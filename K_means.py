@@ -49,7 +49,7 @@ class K_means:
         return ((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)**(1/2)
 
     def start_k_means(self, k: int) -> None:
-        start_time = time.time() 
+        start_time = time.time()
         g_k = [[] for _ in range(k)]
         x_min = min(p[0] for p in self.points)
         x_max = max(p[0] for p in self.points)
@@ -101,6 +101,70 @@ class K_means:
         plt.savefig("Result1.jpg")
         plt.show()
 
+    def start_k_means_numpy(self, k: int) -> None:
+        start_time = time.time()
+        x_min, x_max = self.points[:, 0].min(), self.points[:, 0].max()
+        y_min, y_max = self.points[:, 1].min(), self.points[:, 1].max()
+
+        c_k = [
+            [np.random.uniform(x_min, x_max), np.random.uniform(y_min, y_max)]
+            for _ in range(k)
+        ]
+
+        """
+        c_k
+        [
+            [x, y]
+            [x, y]
+        ]
+
+        self.points[:, np.newaxis]
+        [
+            [
+                [dis_x, dis_y]
+                [dis_x, dis_y]
+                [dis_x, dis_y]
+                [dis_x, dis_y]
+            ]
+            [
+                [dis_x, dis_y]
+                [dis_x, dis_y]
+                [dis_x, dis_y]
+                [dis_x, dis_y]
+            ]
+        ]
+        
+        """
+
+        while True:
+            g_k = [[] for _ in range(k)]
+            distances = np.linalg.norm(
+                self.points[:, np.newaxis] - c_k, axis=2)
+
+            selected_c = np.argmin(distances, axis=1)
+            for i in range(k):
+                g_k[i] = self.points[selected_c == i]
+
+            new_c = np.array([
+                g.mean(axis=0) if len(g) > 0 else random.choice(self.points)
+                for g in g_k
+            ])
+
+            if np.all(np.linalg.norm(new_c - c_k, axis=1) <= 0.05):
+                break
+            c_k = new_c
+        end = time.time()
+        logger.info("Used time:%s", end - start_time)
+        
+        logger.info("plotting...")
+        colors = "rbgy"
+        for i, centroid in enumerate(c_k):
+            plt.scatter(centroid[0], centroid[1], color="black", marker='x', zorder=3)
+        for i, g in enumerate(g_k):
+            plt.scatter(g[:, 0], g[:, 1], color=colors[i], zorder=1)
+        plt.savefig("Reasult2.jpg")
+        plt.show()
+
 
 if __name__ == "__main__":
     # generator = Generator(centroids_num=4)
@@ -109,4 +173,5 @@ if __name__ == "__main__":
 
     data = np.genfromtxt("dataset.csv", delimiter=',')
     k_means = K_means(data=data)
-    k_means.start_k_means(4)
+    # k_means.start_k_means(4)
+    k_means.start_k_means_numpy(4)
