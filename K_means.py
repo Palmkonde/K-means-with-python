@@ -165,6 +165,49 @@ class K_means:
             plt.scatter(g[:, 0], g[:, 1], color=colors[i], zorder=1)
         plt.savefig("Reasult3.jpg")
         plt.show()
+    
+    def start_k_means_with_guess(self, k: int) -> None:
+        start_time = time.time()
+        c_k = []
+        c_k.append(self.points[0])
+        
+        for _ in range(k - 1):
+            distances = np.min(
+                [np.linalg.norm(data - c, axis=1) for c in c_k], axis=0
+            )
+
+            selected_point = np.argmax(distances)
+            c_k.append(self.points[selected_point])
+        
+        while True:
+            g_k = [[] for _ in range(k)]
+            distances = np.linalg.norm(
+                self.points[:, np.newaxis] - c_k, axis=2)
+
+            selected_c = np.argmin(distances, axis=1)
+            for i in range(k):
+                g_k[i] = self.points[selected_c == i]
+
+            new_c = np.array([
+                g.mean(axis=0) if len(g) > 0 else random.choice(self.points)
+                for g in g_k
+            ])
+
+            if np.all(np.linalg.norm(new_c - c_k, axis=1) <= 0.05):
+                break
+            c_k = new_c
+        end = time.time()
+        logger.info("Used time:%s", end - start_time)
+        
+        logger.info("plotting...")
+        colors = "rbgy"
+        print(f"Centroid: {c_k}")
+        for i, centroid in enumerate(c_k):
+            plt.scatter(centroid[0], centroid[1], color="black", marker='x', zorder=3)
+        for i, g in enumerate(g_k):
+            plt.scatter(g[:, 0], g[:, 1], color=colors[i], zorder=1)
+        plt.savefig("Reasult3.jpg")
+        plt.show()
 
 if __name__ == "__main__":
     # generator = Generator(centroids_num=4)
@@ -174,4 +217,5 @@ if __name__ == "__main__":
     data = np.genfromtxt("points.csv", delimiter=',')
     k_means = K_means(data=data)
     # k_means.start_k_means(4)
-    k_means.start_k_means_numpy(4)
+    # k_means.start_k_means_numpy(4)
+    k_means.start_k_means_with_guess(4)
