@@ -158,20 +158,20 @@ class K_means:
         
         logger.info("plotting...")
         colors = "rbgy"
+        print(f"Centroid: {c_k}")
         for i, centroid in enumerate(c_k):
             plt.scatter(centroid[0], centroid[1], color="black", marker='x', zorder=3)
         for i, g in enumerate(g_k):
             plt.scatter(g[:, 0], g[:, 1], color=colors[i], zorder=1)
-        plt.savefig("Reasult2.jpg")
+        plt.savefig("Reasult3.jpg")
         plt.show()
-
 
 if __name__ == "__main__":
     # generator = Generator(centroids_num=4)
     # generator.generate()
     # generator.plot()
 
-    data = np.genfromtxt("dataset.csv", delimiter=',')
+    data = np.genfromtxt("points.csv", delimiter=',')
     k_means = K_means(data=data)
     # k_means.start_k_means(4)
     k_means.start_k_means_numpy(4)
